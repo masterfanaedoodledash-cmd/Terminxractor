@@ -1,0 +1,11 @@
+# Android and Windows builds
+
+## Windows executable
+
+Run the **Build Windows EXE** workflow from the Actions tab. It creates a `Terminxractor.exe` artifact using PyInstaller. The workflow also runs automatically when a `v*` tag is pushed.
+
+## Android APK
+
+Run the **Build Android APK** workflow from the Actions tab. It creates a debug APK artifact using Buildozer. The APK currently provides the extraction/download UI; YouTube upload credentials should not be embedded in the APK.
+
+To build a release, add signing secrets and a release-specific workflow before publishing. Only extract or upload media that you own or are authorized to redistribute.
