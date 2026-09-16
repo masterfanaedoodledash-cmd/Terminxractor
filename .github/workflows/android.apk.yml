@@ -3,24 +3,25 @@ name: Build Android APK
 on:
   workflow_dispatch:
   push:
-    tags: ['v*']
+    tags:
+      - "v*"
 
 jobs:
   build-android:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Build APK with Buildozer
+      - name: Build APK
         uses: ArtemSBulgakov/buildozer-action@v1
-        id: buildozer
         with:
           workdir: android_app
           command: buildozer android debug
 
-      - name: Upload APK
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Terminxractor-android
+          name: Terminxractor-android-apk
           path: android_app/bin/*.apk
