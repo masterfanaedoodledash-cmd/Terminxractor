@@ -1,81 +1,102 @@
 # Terminxractor
 
-Terminxractor is a lightweight extractor and uploader utility for downloading a media source and re-uploading it to YouTube through the official YouTube Data API.
+Terminxractor is an authorized YouTube upload utility for videos you own or are explicitly allowed to redistribute. It can download a publicly accessible source, upload a local MP4 through the official YouTube Data API v3, and safely resume interrupted uploads.
 
-This repository intentionally keeps the workflow simple:
-- download a source video URL or use a local extracted file
-- normalize the output name
-- upload to YouTube with OAuth credentials
-- keep the upload private by default until the uploader confirms it is ready
+## Implemented
 
-Important: only upload content you own or are explicitly authorized to redistribute.
+- OAuth 2.0 authorization with a local callback and refresh-token persistence
+- Title, description, tags, category, privacy status, and scheduled publish metadata
+- Duplicate prevention by source YouTube ID and SHA-256 file hash
+- SQLite upload state with YouTube upload IDs and resumable session URLs
+- Chunked resumable uploads with retry/backoff for transient failures
+- Download-to-upload flow for publicly accessible source URLs
+- Secrets and tokens supplied through environment variables or ignored local files
 
-## Features
-- Download a YouTube video using yt-dlp
-- Upload a local media file to YouTube
-- Set title, description, tags, and privacy status
-- Uses environment variables for secrets
+The utility does not bypass private, removed, terminated, regional, or otherwise restricted videos. Use it only for content you own or are authorized to upload.
 
 ## Setup
-
-1. Create a virtual environment
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-```
-
-2. Install dependencies
-
-```bash
 pip install -r requirements.txt
 ```
 
-3. Prepare YouTube OAuth credentials
+In Google Cloud Console:
 
-- Create a Google Cloud project
-- Enable the YouTube Data API v3
-- Create OAuth client credentials
-- Set up a refresh token with the `youtube.upload` scope
-- Copy `.env.example` to `.env` and fill in the values
+1. Create or select a project.
+2. Enable **YouTube Data API v3**.
+3. Create an OAuth client for a desktop application.
+4. Download the client JSON to the path configured by `YOUTUBE_CLIENT_SECRETS_FILE`.
+
+Copy the environment template and adjust paths if needed:
 
 ```bash
 cp .env.example .env
 ```
 
-## Example usage
-
-Download a YouTube URL and upload it to YouTube:
+Run OAuth authorization once:
 
 ```bash
-python youtube_reupload.py \
-  --source-url "https://www.youtube.com/watch?v=example" \
-  --title "My Reupload" \
-  --description "Uploaded via Terminxractor" \
-  --tags "youtube,upload,tool" \
+python youtube_reupload.py auth
+```
+
+The token is saved locally with restrictive permissions and is ignored by Git.
+
+## Upload a local file
+
+```bash
+python youtube_reupload.py upload \
+  --source-file downloads/example.mp4 \
+  --source-video-id SOURCE_VIDEO_ID \
+  --title "Authorized upload" \
+  --description "Uploaded through the YouTube Data API" \
+  --tags "example,authorized" \
+  --category-id 22 \
   --privacy-status private
 ```
 
-Upload a local file directly:
+## Upload a publicly accessible source URL
 
 ```bash
-python youtube_reupload.py \
-  --source-file "downloads/example.mp4" \
-  --title "Local File Reupload" \
-  --description "Processed locally and uploaded via Terminxractor" \
-  --tags "local,upload" \
+python youtube_reupload.py upload \
+  --source-url "https://www.youtube.com/watch?v=VIDEO_ID" \
+  --title "Authorized upload" \
   --privacy-status private
 ```
 
-## Required environment variables
+For repeatable metadata, use a JSON sidecar:
 
-```env
-YOUTUBE_CLIENT_ID=your_client_id
-YOUTUBE_CLIENT_SECRET=your_client_secret
-YOUTUBE_REFRESH_TOKEN=your_refresh_token
+```json
+{
+  "title": "Authorized upload",
+  "description": "Description",
+  "tags": ["example", "authorized"],
+  "categoryId": "22",
+  "privacyStatus": "private"
+}
 ```
 
-## Notes
-- The script stores downloaded files in `downloads/`
-- If you are reusing a video you do not own, ensure you have permission before uploading
-- A public upload is possible, but private is safer when testing
+```bash
+python youtube_reupload.py upload \
+  --source-file downloads/example.mp4 \
+  --metadata metadata.json
+```
+
+If an upload is interrupted, run the same command again. The SQLite state file reuses the resumable YouTube session when possible and skips completed duplicates.
+
+## Environment variables
+
+See `.env.example`:
+
+- `YOUTUBE_CLIENT_SECRETS_FILE`
+- `YOUTUBE_TOKEN_FILE`
+- `YOUTUBE_STATE_DB`
+- `YOUTUBE_DOWNLOAD_DIR`
+- `YOUTUBE_OAUTH_PORT`
+- `YOUTUBE_UPLOAD_CHUNK_BYTES`
+- `YOUTUBE_UPLOAD_MAX_RETRIES`
+- `YOUTUBE_UPLOAD_DEFAULT_PRIVACY`
+- `YOUTUBE_UPLOAD_CATEGORY_ID`
+
+Legacy `YOUTUBE_CLIENT_ID`, `YOUTUBE_CLIENT_SECRET`, and `YOUTUBE_REFRESH_TOKEN` values are also accepted for an existing authorized setup, but client secrets and refresh tokens must never be committed.

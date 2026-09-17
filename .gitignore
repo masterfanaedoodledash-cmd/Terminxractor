@@ -1,8 +1,15 @@
 .env
 .env.*
+!.env.example
 __pycache__/
 *.pyc
+.pytest_cache/
 venv/
 .venv/
 downloads/
+*.sqlite3
+*.db
+.youtube-token.json
+oauth-client.json
+client_secret*.json
 token.json
