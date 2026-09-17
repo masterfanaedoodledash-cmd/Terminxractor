@@ -1,11 +1,15 @@
 # Android and Windows builds
 
+## Android APK
+
+The Android APK provides a mobile extraction workflow for videos you own or are authorized to redistribute. It saves the MP4 and a JSON metadata sidecar containing the title, description, tags, category, privacy status, source URL, and source video ID.
+
+Run the **Build Android APK** workflow from the Actions tab. The workflow builds `Android/api.py` with Buildozer and publishes a debug APK artifact named `Terminxractor-android-apk`.
+
+The APK does not bypass private, deleted, or terminated videos and does not contain YouTube OAuth credentials. The desktop uploader in `youtube_reupload.py` handles OAuth 2.0, duplicate prevention, metadata upload, and resumable uploads separately.
+
 ## Windows executable
 
 Run the **Build Windows EXE** workflow from the Actions tab. It creates a `Terminxractor.exe` artifact using PyInstaller. The workflow also runs automatically when a `v*` tag is pushed.
 
-## Android APK
-
-Run the **Build Android APK** workflow from the Actions tab. It creates a debug APK artifact using Buildozer. The APK currently provides the extraction/download UI; YouTube upload credentials should not be embedded in the APK.
-
-To build a release, add signing secrets and a release-specific workflow before publishing. Only extract or upload media that you own or are authorized to redistribute.
+For a release APK, add signing secrets and a release-specific workflow before publishing.

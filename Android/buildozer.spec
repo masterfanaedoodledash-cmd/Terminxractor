@@ -4,7 +4,7 @@
  package.domain = com.terminxractor
  source.dir = .
  source.include_exts = py,png,jpg,kv,atlas,json
- version = 1.0.0
+ version = 1.1.0
  requirements = python3,kivy,yt-dlp
  orientation = portrait
  fullscreen = 0
@@ -12,7 +12,7 @@
  android.minapi = 21
  android.ndk = 25b
  android.accept_sdk_license = True
- android.permissions = INTERNET,READ_EXTERNAL_STORAGE,WRITE_EXTERNAL_STORAGE
+ android.permissions = INTERNET
 
 [buildozer]
  log_level = 2
